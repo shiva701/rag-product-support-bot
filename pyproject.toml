@@ -1,0 +1,23 @@
+[project]
+name = "product-support-bot"
+version = "0.1.0"
+description = "Local RAG support bot for the Kettlewise K2 Smart Kettle (Ollama chat + Hugging Face embeddings)."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.0)",
+    "python-dotenv (>=1.0)",
+    "sentence-transformers (>=6.0)",
+    "ollama (>=0.6)",
+    "fastapi (>=0.115)",
+    "pydantic (>=2.0)",
+    "uvicorn (>=0.30)",
+]
+
+[tool.poetry]
+# This project is a set of scripts, not an installable package.
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

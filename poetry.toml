@@ -1,0 +1,3 @@
+# Keep the virtualenv at ./.venv so README commands and .vscode/launch.json keep working.
+[virtualenvs]
+in-project = true

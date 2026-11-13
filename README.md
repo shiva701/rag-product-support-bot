@@ -15,7 +15,7 @@ Everything runs on your machine: no API keys or usage costs.
 
 ## 1. Prerequisites
 
-- **Python 3.10+**
+- **Python 3.12+** and **Poetry 2.0+**
 - **Node.js 18+** and npm (only for the web UI)
 - **Ollama**: install from https://ollama.com
 - **Hugging Face account** (only for gated models such as `google/embeddinggemma-300m`)
@@ -26,12 +26,16 @@ Everything runs on your machine: no API keys or usage costs.
 
 ### Python environment
 
+Dependencies are managed with [Poetry](https://python-poetry.org) (2.0+) and declared in `pyproject.toml`.
+
 ```bash
+pipx install poetry          # or: brew install poetry
 cd product-support-bot
-python3 -m venv .venv
-source .venv/bin/activate
-pip install numpy python-dotenv sentence-transformers ollama fastapi uvicorn
+poetry install               # creates ./.venv (see poetry.toml) and installs deps
+source .venv/bin/activate    # or prefix commands with `poetry run`
 ```
+
+Add or remove packages with `poetry add <pkg>` / `poetry remove <pkg>`; commit both `pyproject.toml` and `poetry.lock`.
 
 ### Chat model
 

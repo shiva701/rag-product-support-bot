@@ -1,6 +1,10 @@
+"""A small in-memory vector index: cosine search, saved as .npy plus JSON."""
+
 import json
 from pathlib import Path
+
 import numpy as np
+
 
 class VectorStore:
     def __init__(self, vectors: np.ndarray, chunks: list[dict]):
@@ -19,5 +23,7 @@ class VectorStore:
 
     @classmethod
     def load(cls, folder: str) -> "VectorStore":
-        return cls(np.load(Path(folder) / "vectors.npy"),
-                   json.loads((Path(folder) / "chunks.json").read_text()))
+        return cls(
+            np.load(Path(folder) / "vectors.npy"),
+            json.loads((Path(folder) / "chunks.json").read_text()),
+        )

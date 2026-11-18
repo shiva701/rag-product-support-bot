@@ -1,9 +1,9 @@
 [project]
 name = "product-support-bot"
 version = "0.1.0"
-description = "Local RAG support bot for the Kettlewise K2 Smart Kettle (Ollama chat + Hugging Face embeddings)."
+description = "Local multi-agent RAG support bot: one LangGraph agent per product in kb/ (Ollama chat + Hugging Face embeddings)."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "numpy (>=2.0)",
     "python-dotenv (>=1.0)",
@@ -12,6 +12,7 @@ dependencies = [
     "fastapi (>=0.115)",
     "pydantic (>=2.0)",
     "uvicorn (>=0.30)",
+    "langgraph (>=1.2.21,<2.0.0)",
 ]
 
 [tool.poetry]
@@ -21,3 +22,34 @@ package-mode = false
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "debugpy (>=1.8.22,<2.0.0)",
+    "black (>=26.10.1,<27.0.0)",
+    "pylint (>=4.1.4,<5.0.0)"
+]
+
+# --- Code style ----------------------------------------------------------------
+# Format:  black .        Lint:  pylint *.py
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.pylint.main]
+py-version = "3.12"
+ignore = ["frontend", "index", "kb", ".venv"]
+jobs = 1                    # parallel mode (jobs > 1) crashes on Python 3.15 (dill)
+
+[tool.pylint.format]
+max-line-length = 100       # match black
+
+[tool.pylint."messages control"]
+disable = [
+    "line-too-long",                # black's job
+    "missing-function-docstring",   # small, self-explanatory functions; docstrings where they help
+    "missing-class-docstring",
+]
+
+[tool.pylint.similarities]
+min-similarity-lines = 8    # don't flag short repeated snippets (CLI arg parsing, response fields)

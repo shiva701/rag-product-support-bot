@@ -14,6 +14,15 @@
       "env": { "PYTHONUNBUFFERED": "1" },
       "console": "integratedTerminal",
       "justMyCode": true
+    },
+    {
+      // Start the app with `./run.sh start --debug`, then run this to attach.
+      "name": "Attach to run.sh --debug",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "127.0.0.1", "port": 5678 },
+      "pathMappings": [{ "localRoot": "${workspaceFolder}", "remoteRoot": "${workspaceFolder}" }],
+      "justMyCode": true
     }
   ]
 }

@@ -1,19 +1,26 @@
+"""Shared settings: models, folders, and retrieval defaults (overridable via .env)."""
+
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Fully local setup: sentence-transformers for embeddings, Ollama for chat.
 EMBED_MODEL = os.getenv("EMBED_MODEL", "google/embeddinggemma-300m")
-CHAT_MODEL = os.getenv("CHAT_MODEL", "gemma4")   # any model from `ollama list`
+CHAT_MODEL = os.getenv("CHAT_MODEL", "gemma4")  # any model from `ollama list`
 
-KB_DIR = "kb"
-INDEX_DIR = "index"
+KB_DIR = "kb"  # one sub-folder per product: kb/<product>/
+INDEX_DIR = "index"  # one index per product:      index/<product>/
 
-MAX_SECTION_CHARS = 1200   # split sections longer than this
-TOP_K = 4                  # sections passed to the model
-MIN_SCORE = 0.30           # refusal gate; calibrate this with calibrate.py
+MAX_SECTION_CHARS = 1200  # split sections longer than this
 
+MAX_ANSWER_TOKENS = 2000  # cap on each model reply, so a runaway generation can't hang the bot
+CHAT_TIMEOUT_SECONDS = 120  # give up on a model call after this long
+
+# Defaults for products that don't set their own value in kb/<product>/product.toml
+TOP_K = 4  # sections passed to the model
+MIN_SCORE = 0.30  # refusal gate; calibrate with calibrate.py
 ESCALATION_MESSAGE = (
     "I'm not sure about that one, and I don't want to guess. "
     "Please contact RAG support at support@rag.example "

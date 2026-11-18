@@ -1,0 +1,44 @@
+# The resume as a "product": an agent that answers questions about Shiva's background.
+# After editing resume.md, rebuild with:  python ingest.py resume
+
+name = "Shiva Shukla"
+brand = "Resume"
+tagline = "Software Engineer with 6+ years across Java, Python, TypeScript, cloud, and AI agents."
+
+# The router agent reads this to decide whether a question belongs to this product.
+description = "Shiva Shukla, a software engineer (a person, not a device): work experience, employers (PTC Inc., GlobalLogic), job titles and dates, projects (the Requirement Assistant / RA AI tool, a FastMCP gateway), programming languages and technical skills, education and degrees, career background. Use this for questions about Shiva, 'you', 'your experience', 'the candidate', or the person who built this bot."
+
+# --- Prompt pieces (slotted into the shared grounding rules in rag.py) --------
+persona = "You answer questions from recruiters and visitors about Shiva Shukla, a software engineer, using Shiva's resume. Refer to Shiva by name. If the visitor says 'you' or 'your', they mean Shiva."
+subject = "Shiva Shukla's professional background"
+general_scope = "software engineers in general"
+example_no = "\"No, the resume does not list Go among Shiva's languages; the listed languages are Java, Python, JavaScript, TypeScript, and SQL.\" when the sections list the languages"
+example_missing = "\"What is Shiva's salary expectation?\" when no section mentions salary"
+
+# --- Retrieval ----------------------------------------------------------------
+top_k = 6          # the resume is small and its sections overlap, so pass more of them
+min_score = 0.35   # calibrate with:  python calibrate.py resume
+
+# --- When the docs don't have the answer --------------------------------------
+general_fallback = false   # never guess facts about a person
+escalation_message = "That isn't covered in Shiva's resume, and I don't want to guess. Please reach out to Shiva directly through GitHub (github.com/shiva701) or LinkedIn."
+
+# --- Web UI -------------------------------------------------------------------
+welcome = "Hi! I can answer questions about Shiva Shukla's experience, skills, and education, straight from the resume. What would you like to know?"
+suggestions = [
+  "What is Shiva's most recent role?",
+  "What AI and LLM experience does Shiva have?",
+  "Which databases has Shiva worked with?",
+  "Where did Shiva study?",
+]
+contact_label = "Get in touch:"
+contact_text = "github.com/shiva701"
+contact_href = "https://github.com/shiva701"
+specs = [
+  ["Experience", "6+ years"],
+  ["Latest role", "Software Engineer Specialist, PTC"],
+  ["Backend", "Java · Spring Boot · FastAPI"],
+  ["Front end", "TypeScript · Lit · React"],
+  ["Cloud", "Azure (AKS) · AWS"],
+  ["Education", "MS Computer Science, GMU"],
+]

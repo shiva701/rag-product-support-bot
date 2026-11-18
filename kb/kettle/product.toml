@@ -1,0 +1,44 @@
+# One folder in kb/ = one product = one agent. This file configures that agent.
+# After editing the .md files here, rebuild with:  python ingest.py kettle
+
+name = "Kettlewise K2"
+brand = "RAG Appliances"
+tagline = "Smart kettle with precise temperature control and app scheduling."
+
+# The router agent reads this to decide whether a question belongs to this product.
+description = "Kettlewise K2 smart electric kettle: heating water, temperature presets, keep-warm, descaling and cleaning, error codes E1-E3, the RAG Home app and Wi-Fi pairing, kettle warranty and returns."
+
+# --- Prompt pieces (slotted into the shared grounding rules in rag.py) --------
+persona = "You are the customer support assistant for the Kettlewise K2 Smart Kettle by RAG Appliances."
+subject = "the Kettlewise K2"            # "If a question is unrelated to <subject> ..."
+general_scope = "kettles in general"     # "... even if you believe it is true for <general_scope>"
+example_no = "\"No, the kettle is not dishwasher safe.\""
+example_missing = "\"Does it come with a tea infuser?\" when no section mentions an infuser"
+
+# --- Retrieval ----------------------------------------------------------------
+top_k = 4          # sections passed to the model
+min_score = 0.30   # refusal gate; calibrate with:  python calibrate.py kettle
+
+# --- When the docs don't have the answer --------------------------------------
+general_fallback = false   # true = answer from the chat model's general knowledge, with a notice
+escalation_message = "I'm not sure about that one, and I don't want to guess. Please contact RAG support at support@rag.example and a specialist will help you."
+
+# --- Web UI -------------------------------------------------------------------
+welcome = "Hi! I can answer questions about the Kettlewise K2 using the official docs. What do you need help with?"
+suggestions = [
+  "How do I descale the kettle?",
+  "My kettle shows E1",
+  "The app can't find my kettle",
+  "How long is the warranty?",
+]
+contact_label = "Need a person?"
+contact_text = "support@rag.example"
+contact_href = "mailto:support@rag.example"
+specs = [
+  ["Capacity", "1.5 L (min 0.5 L)"],
+  ["Power", "1500 W · 120 V"],
+  ["Presets", "70° · 80° · 90° · 100°C"],
+  ["Keep-warm", "Up to 60 min"],
+  ["Connectivity", "2.4 GHz Wi-Fi"],
+  ["Warranty", "2-year limited"],
+]

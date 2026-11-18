@@ -1,4 +1,7 @@
+"""Read a product's markdown documents from its kb/ folder."""
+
 from pathlib import Path
+
 
 def load_documents(folder: str) -> list[dict]:
     """Return [{"source": "user_manual.md", "text": "..."}, ...]."""

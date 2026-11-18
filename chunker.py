@@ -1,4 +1,7 @@
+"""Split a markdown document into sections, one per '## ' heading."""
+
 import re
+
 
 def split_sections(text: str) -> tuple[str, list[tuple[str, str]]]:
     """Return (doc_title, [(section_title, section_body), ...]) from markdown."""
@@ -37,11 +40,13 @@ def chunk_documents(docs: list[dict], max_chars: int) -> list[dict]:
         doc_title, sections = split_sections(doc["text"])
         for sec_title, body in sections:
             for j, piece in enumerate(split_long(body, max_chars)):
-                chunks.append({
-                    "id": f"{doc['source']}#{sec_title}" + (f"-{j}" if j else ""),
-                    "source": doc["source"],
-                    "section": sec_title,
-                    # Prepend titles so the embedding knows the context.
-                    "text": f"{doc_title} > {sec_title}\n{piece}",
-                })
+                chunks.append(
+                    {
+                        "id": f"{doc['source']}#{sec_title}" + (f"-{j}" if j else ""),
+                        "source": doc["source"],
+                        "section": sec_title,
+                        # Prepend titles so the embedding knows the context.
+                        "text": f"{doc_title} > {sec_title}\n{piece}",
+                    }
+                )
     return chunks

@@ -1,0 +1,49 @@
+# The Zentro A5 phone agent. Unlike the other products, this one falls back to the chat
+# model's general knowledge (with a notice) when the documents don't have the answer.
+# After editing the .md files here, rebuild with:  python ingest.py phone
+
+name = "Zentro A5"
+brand = "RAG Mobile"
+tagline = "6.4-inch 5G smartphone with a triple camera, 45 W fast charging, and 6 years of updates."
+
+# The router agent reads this to decide whether a question belongs to this product.
+description = "Zentro A5 smartphone (mobile phone) by RAG Mobile: specifications, display, cameras, battery and charging, SIM and eSIM, 5G and Wi-Fi, setup and data transfer, software updates, backup and factory reset, phone troubleshooting, phone warranty, repairs and returns, and general smartphone questions."
+
+# --- Prompt pieces (slotted into the shared grounding rules in rag.py) --------
+persona = "You are the customer support assistant for the Zentro A5 smartphone by RAG Mobile."
+subject = "the Zentro A5"
+general_scope = "smartphones in general"
+example_no = "\"No, the Zentro A5 does not have a headphone jack.\""
+example_missing = "\"Does it have a satellite SOS feature?\" when no section mentions satellite features"
+
+# --- Retrieval ----------------------------------------------------------------
+top_k = 4
+min_score = 0.40   # calibrate with:  python calibrate.py phone
+
+# --- When the docs don't have the answer --------------------------------------
+# true = a second agent answers from the chat model's general knowledge. The answer is
+# always prefixed with general_notice, and the API marks it with "source": "general".
+general_fallback = true
+general_topic = "smartphones and mobile technology"   # questions outside this topic are still escalated
+general_notice = "Note: the Zentro A5 documents don't cover this, so the following is general information from the AI model, not official Zentro A5 guidance."
+escalation_message = "I'm not sure about that one, and I don't want to guess. Please contact RAG Mobile support at mobile-support@rag.example and a specialist will help you."
+
+# --- Web UI -------------------------------------------------------------------
+welcome = "Hi! I can answer questions about the Zentro A5 using the official docs. If the docs don't cover something, I'll give general smartphone information and tell you so."
+suggestions = [
+  "How fast does the Zentro A5 charge?",
+  "Can I use two SIMs?",
+  "My phone says moisture detected",
+  "What's the difference between OLED and LCD?",
+]
+contact_label = "Need a person?"
+contact_text = "mobile-support@rag.example"
+contact_href = "mailto:mobile-support@rag.example"
+specs = [
+  ["Display", "6.4\" AMOLED · 120 Hz"],
+  ["Cameras", "50 + 12 + 10 MP"],
+  ["Battery", "4,800 mAh · 45 W"],
+  ["Storage", "128 / 256 GB"],
+  ["Water resistance", "IP68"],
+  ["Warranty", "1-year limited"],
+]

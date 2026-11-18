@@ -1,13 +1,48 @@
-# Kettlewise K2 Support Bot
+# Multi-Product Support Bot
 
-A local RAG (retrieval-augmented generation) support bot for the fictional *Kettlewise K2 Smart Kettle*. It answers questions only from the docs in `kb/`, cites its sources, and escalates to a human when the docs don't cover the question.
+A local, multi-agent RAG (retrieval-augmented generation) support bot built with LangGraph. Every folder in `kb/` is a product with its own documents and its own agent. A router agent reads each question and passes it to the right product agent.
 
-Everything runs on your machine: no API keys or usage costs.
+| Product (`kb/<id>/`) | What it answers | When the docs don't have the answer |
+|---|---|---|
+| `kettle` | The fictional *Kettlewise K2* smart kettle | Escalates to a human |
+| `phone` | The fictional *Zentro A5* smartphone | Gives general smartphone information from the chat model, with a notice that it didn't come from the docs |
+| `resume` | Shiva Shukla's professional background | Escalates (never guesses facts about a person) |
+
+Each agent answers only from its own docs and cites its sources. Everything runs on your machine: no API keys or usage costs.
+
+```
+question -> router -> kettle_agent | phone_agent | resume_agent -> answer from the docs
+               |                          |
+               |                          +-> general_agent (phone only) -> general answer + notice
+               |                          +-> escalate -> "contact support"
+               +-> clarify -> "which product do you mean?"
+```
+
+Print the real graph as a Mermaid diagram with `python graph.py`.
+
+## Screenshots
+
+**Start screen.** In Auto mode the router picks the product for each question. The buttons at the top left switch to a single product's assistant.
+
+![Start screen in Auto mode, listing the three products](docs/screenshots/01-auto-home.png)
+
+**Routing.** Two questions in one conversation go to two different agents. Each reply shows which agent answered, the document sections it cited, and the steps the agents took.
+
+![The router sends a kettle question to the kettle agent and a phone question to the phone agent](docs/screenshots/02-auto-routing.png)
+
+**General-knowledge fallback (phone only).** The first answer comes from the Zentro A5 docs. The second question isn't covered by the docs, so the general-knowledge agent answers and the reply is labelled and starts with a notice.
+
+![A phone answer from the docs, followed by a labelled general-information answer](docs/screenshots/03-phone-general-fallback.png)
+
+**Resume and escalation.** The resume agent answers from the resume and cites the sections it used. When the resume doesn't cover a question, it declines instead of guessing.
+
+![A resume answer with citations, followed by an escalation for a question the resume doesn't cover](docs/screenshots/04-resume-and-escalation.png)
 
 | Part | Tool |
 |---|---|
 | Embeddings | Hugging Face model via `sentence-transformers` (default `google/embeddinggemma-300m`) |
 | Chat model | Ollama (default `llama3.2`) |
+| Agents | LangGraph (`graph.py`) |
 | API | FastAPI on port 8000 |
 | Web UI | React + Vite on port 5173 |
 
@@ -59,7 +94,7 @@ ollama pull llama3.2
 
 The model downloads on first use and is cached in `~/.cache/huggingface/`. After that it runs locally.
 
-> To skip this step, use a non-gated model such as `BAAI/bge-small-en-v1.5` or `all-MiniLM-L6-v2` (see [Changing models](#7-changing-models)).
+> To skip this step, use a non-gated model such as `BAAI/bge-small-en-v1.5` or `all-MiniLM-L6-v2` (see [Changing models](#8-changing-models)).
 
 ### Environment file
 
@@ -89,10 +124,11 @@ Run this the first time, and again whenever you edit files in `kb/` or change `E
 
 ```bash
 source .venv/bin/activate
-python ingest.py
+python ingest.py            # all products
+python ingest.py phone      # one product
 ```
 
-This splits the docs into sections, embeds them, and saves the index to `index/`.
+This splits each product's docs into sections, embeds them, and saves one index per product to `index/<product>/`.
 
 ---
 
@@ -104,7 +140,7 @@ This splits the docs into sections, embeds them, and saves the index to `index/`
 curl localhost:11434        # should print "Ollama is running"
 ```
 
-### Option A: Web UI
+### Option A: Web UI (manual)
 
 Use two terminals.
 
@@ -120,16 +156,17 @@ cd frontend
 npm run dev
 ```
 
-Open **http://localhost:5173**.
+Open **http://localhost:5173**. Choose **Auto** to let the router pick the product for each question, or choose a product to talk to its agent only. Each reply shows which agent answered; click the line under a reply to see the steps the agents took.
 
 ### Option B: Terminal chat
 
 ```bash
 source .venv/bin/activate
-python chat.py
+python chat.py            # the router picks the product
+python chat.py resume     # one product only
 ```
 
-Type `debug` to toggle retrieval scores, `quit` to exit.
+Type `use phone` or `use auto` to switch, `products` to list them, `debug` to toggle agent steps and retrieval scores, `quit` to exit.
 
 ### Stop the servers
 
@@ -173,6 +210,13 @@ curl -X POST http://localhost:8000/api/chat \
   -d '{"question": "My kettle shows E1, what do I do?"}'
 ```
 
+Optional request fields:
+
+| Field | Use |
+|---|---|
+| `product_id` | `"kettle"`, `"phone"`, or `"resume"`: skip the router and ask that product's agent |
+| `thread_id` | Any string. Send the same one for every turn of a conversation so follow-up questions stay with the same product |
+
 Response:
 
 ```json
@@ -180,11 +224,27 @@ Response:
   "found": true,
   "answer": "Add at least 0.5 liters of water and press START.",
   "citations": ["troubleshooting.md#Error Code E1"],
-  "refused_by": null
+  "refused_by": null,
+  "source": "docs",
+  "product": "kettle",
+  "product_name": "Kettlewise K2",
+  "routed_by": "router",
+  "trace": [
+    {"agent": "router", "detail": "Kettlewise K2: chosen from the question"},
+    {"agent": "kettle_agent", "detail": "answered from the documents"}
+  ],
+  "thread_id": "..."
 }
 ```
 
-When the bot refuses, `found` is `false` and `refused_by` is `"retrieval_gate"` or `"model"`.
+- `source` is `"docs"` for a cited answer, or `"general"` when the answer came from the chat model's general knowledge (phone only). General answers always start with a notice and have no citations.
+- When the bot refuses, `found` is `false`, `source` is `null`, and `refused_by` is `"retrieval_gate"`, `"model"`, `"model_error"` (the model's reply was unusable), or `"router"` (no product matched).
+
+**List the products**
+
+```bash
+curl http://localhost:8000/api/products
+```
 
 **Health check**
 
@@ -201,23 +261,71 @@ Interactive docs: **http://localhost:8000/docs**. To use the curl in Postman, ch
 ```bash
 source .venv/bin/activate
 
-python calibrate.py     # suggests a MIN_SCORE refusal threshold
-python evaluate.py      # grades the bot against eval_set.json
+python calibrate.py     # suggests a min_score refusal threshold for each product
+python evaluate.py      # grades each agent against kb/<product>/eval_set.json, then the router
 ```
 
-`evaluate.py` reports three scores:
+Add a product id to run one product only, e.g. `python evaluate.py phone`.
+
+`evaluate.py` reports three scores per product, plus one for the router:
 
 | Score | Measures |
 |---|---|
-| Answer/refuse decision | Answered real questions, refused out-of-scope ones |
+| Decision | Answered from the docs, answered from general knowledge, or refused, as expected |
 | Retrieval hit rate | The right doc section was found |
 | Answer content correct | The answer contains the key facts |
+| Routing accuracy | Without being told the product, the router sent the question to the right agent |
 
-Set `MIN_SCORE` in `config.py` from the calibration output. If answerable and unanswerable scores overlap, lean low and let the model handle borderline questions.
+Set `min_score` in `kb/<product>/product.toml` from the calibration output. If the two groups of scores overlap, lean low and let the model handle borderline questions.
 
 ---
 
-## 7. Changing models
+### Lint and format
+
+[Black](https://black.readthedocs.io) formats the code and [Pylint](https://pylint.readthedocs.io) lints it. Both are dev dependencies (`poetry install --with dev`) and are configured in `pyproject.toml` (100-character lines, Python 3.12).
+
+```bash
+black .                          # format
+pylint *.py                      # lint
+black --check . && pylint *.py   # check only, e.g. before a commit
+```
+
+To silence a Pylint warning on purpose, add a comment on that line with the reason, e.g. `# pylint: disable=import-outside-toplevel`.
+
+---
+
+## 7. Products
+
+### Add a product
+
+1. Create `kb/<id>/` (the folder name is the product id).
+2. Add the documents as `.md` files. Each file needs one `# Title` and a `## Heading` for every section; each section becomes one searchable chunk.
+3. Copy a `product.toml` from another product and edit it.
+4. Optionally add `eval_set.json` with test questions.
+5. Run `python ingest.py <id>`, then `python calibrate.py <id>`, and restart the API.
+
+No code changes are needed: the graph creates one agent per folder, and the UI reads the product list from the API.
+
+### Settings in `product.toml`
+
+| Setting | What it does |
+|---|---|
+| `name`, `brand`, `tagline`, `specs`, `welcome`, `suggestions`, `contact_*` | What the web UI shows |
+| `description` | What the router reads to decide if a question belongs to this product |
+| `persona`, `subject`, `general_scope`, `example_no`, `example_missing` | Fill the blanks in the shared answer prompt (`SYSTEM_PROMPT` in `rag.py`) |
+| `top_k`, `min_score` | How many sections go to the model, and the retrieval refusal threshold |
+| `escalation_message` | The reply when the agent can't answer |
+| `general_fallback` | `true`: when the docs have no answer, answer from the chat model's general knowledge instead of escalating |
+| `general_topic` | The only topic the general answer may cover; anything else is still escalated |
+| `general_notice` | The sentence put in front of every general answer |
+
+### How the general-knowledge fallback works
+
+Only the phone has `general_fallback = true`. When the phone agent can't answer from its docs (the retrieval score is too low, or the model says the sections don't answer it), the question goes to `general_agent`. That agent may only give general information about `general_topic`, and is told never to state facts specific to the product, such as its price or features. The notice is added in code, so it is always there. If the question is off-topic, it is escalated as usual.
+
+---
+
+## 8. Changing models
 
 ### Chat model
 
@@ -239,7 +347,7 @@ Set `CHAT_MODEL=gemma4` in `.env`, then restart the API. No re-indexing needed.
    ```bash
    rm -rf index/
    python ingest.py
-   python calibrate.py     # update MIN_SCORE in config.py
+   python calibrate.py     # update min_score in each product.toml
    python evaluate.py
    ```
 
@@ -249,40 +357,46 @@ Set `CHAT_MODEL=gemma4` in `.env`, then restart the API. No re-indexing needed.
 
 ---
 
-## 8. Project structure
+## 9. Project structure
 
 ```
 product-support-bot/
 ├── .env              # model settings (not committed)
-├── config.py         # settings: models, TOP_K, MIN_SCORE, escalation message
-├── loader.py         # reads kb/*.md
+├── config.py         # models and default settings
+├── products.py       # loads kb/*/product.toml into the product registry
+├── loader.py         # reads a product's *.md files
 ├── chunker.py        # splits docs into one chunk per section
 ├── embedding.py      # text -> vectors (sentence-transformers)
-├── vector_store.py   # saves, loads, and searches the index
-├── ingest.py         # builds index/
-├── bot.py            # retrieve -> refusal gates -> Ollama -> JSON answer
+├── vector_store.py   # saves, loads, and searches an index
+├── ingest.py         # builds index/<product>/
+├── rag.py            # retrieval, prompts, and the Ollama calls
+├── graph.py          # LangGraph: router, product agents, general agent, escalation
+├── bot.py            # answer(): runs the graph for one question
 ├── api.py            # FastAPI server
 ├── chat.py           # terminal chat
 ├── calibrate.py      # threshold helper
 ├── evaluate.py       # eval runner
-├── eval_set.json     # test questions
-├── kb/               # knowledge base docs
+├── kb/
+│   ├── kettle/       # product.toml, docs, eval_set.json
+│   ├── phone/
+│   └── resume/
 ├── index/            # generated by ingest.py
 └── frontend/         # React UI
 ```
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 | Problem | Fix |
 |---|---|
 | `Connection refused` on port 11434, or API returns 503 | Start Ollama (`ollama serve` or the app) |
 | `model "llama3.2" not found` | `ollama pull llama3.2` |
 | `401 Unauthorized` from huggingface.co | Accept the model license and log in (see setup) |
-| `FileNotFoundError: index/vectors.npy` | Run `python ingest.py` |
+| `No index for '<product>'` | Run `python ingest.py` |
 | Shape mismatch or nonsense scores after a model change | `rm -rf index/` then `python ingest.py` |
-| Bot refuses questions the docs answer | Lower `MIN_SCORE`, or try a stronger embedding model |
+| Bot refuses questions the docs answer | Lower `min_score` in that product's `product.toml`, or try a stronger embedding model |
+| A question goes to the wrong product | Make that product's `description` in `product.toml` more specific, or pick the product in the UI |
 | Right section found but answer says "not sure" | Try a bigger chat model, e.g. `CHAT_MODEL=gemma4` |
 | First answer is slow | Ollama is loading the model; later answers are faster |
 | UI says "Couldn't reach the support bot" | Start the API on port 8000 |

@@ -1,6 +1,7 @@
 """The LLM and retrieval building blocks. graph.py wires these into agents."""
 
 import json
+import re
 
 import ollama
 
@@ -91,7 +92,8 @@ Rules:
    information is not available, set "answered_from_docs" to false.
 4. If the sections answer only part of the question, answer that part and say what you
    could not find.
-5. Cite the number of every section you used (for example 1 or 3).
+5. Put the number of every section you used in "citations" (for example [1, 3]). Never write
+   section numbers or references such as (1) or [2] in the answer text itself.
 6. Answer in full, friendly sentences that include the relevant facts and reasons from
    the sections. Use numbered steps for procedures.
 7. If a question is unrelated to {subject}, set "answered_from_docs" to false.
@@ -132,6 +134,23 @@ def build_messages(question: str, hits: list[dict], product: Product) -> list[di
     ]
 
 
+# A section reference the model wrote into the answer anyway: "(1)", "[2, 4]", "(sections 1 and 3)".
+# The numbers only mean something inside the prompt, so they are removed before the user sees them.
+_SECTION_REF = re.compile(
+    r"\s*[(\[](?:sections?\s*)?(\d+(?:\s*(?:,|and|&)\s*\d+)*)[)\]]", flags=re.IGNORECASE
+)
+
+
+def strip_section_refs(answer: str, n_sections: int) -> str:
+    """Remove section-number markers, but only when every number is a real section number."""
+
+    def drop(m: re.Match) -> str:
+        numbers = [int(x) for x in re.findall(r"\d+", m.group(1))]
+        return "" if all(1 <= x <= n_sections for x in numbers) else m.group(0)
+
+    return _SECTION_REF.sub(drop, answer).strip()
+
+
 def grounded_answer(question: str, hits: list[dict], product: Product) -> dict:
     """Returns {"answered": bool, "answer": str, "citations": [section ids], "error": bool}.
 
@@ -141,7 +160,7 @@ def grounded_answer(question: str, hits: list[dict], product: Product) -> dict:
     data = chat_json(build_messages(question, hits, product), ANSWER_SCHEMA)
     if not isinstance(data.get("answered_from_docs"), bool):
         return {"answered": False, "answer": "", "citations": [], "error": True}
-    answer = str(data.get("answer") or "").strip()
+    answer = strip_section_refs(str(data.get("answer") or ""), len(hits))
     if not data["answered_from_docs"] or not answer:
         return {"answered": False, "answer": "", "citations": [], "error": False}
 

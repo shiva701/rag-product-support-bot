@@ -240,6 +240,28 @@ Response:
 - `source` is `"docs"` for a cited answer, or `"general"` when the answer came from the chat model's general knowledge (phone only). General answers always start with a notice and have no citations.
 - When the bot refuses, `found` is `false`, `source` is `null`, and `refused_by` is `"retrieval_gate"`, `"model"`, `"model_error"` (the model's reply was unusable), or `"router"` (no product matched).
 
+**Ask a question and watch the agents work (streaming)**
+
+`POST /api/chat/stream` takes the same request but streams newline-delimited JSON: a `progress` event each time an agent starts, updates or finishes, then one `answer` event with the same fields as `/api/chat`. The web UI uses this endpoint for its live activity panel.
+
+```bash
+curl -N -X POST http://localhost:8000/api/chat/stream \
+  -H "Content-Type: application/json" \
+  -d '{"question": "How do I descale the kettle?"}'
+```
+
+```json
+{"type": "progress", "agent": "api", "status": "done", "detail": "Question received"}
+{"type": "progress", "agent": "router", "status": "running", "detail": "Reading the question to pick a product"}
+{"type": "progress", "agent": "router", "status": "done", "detail": "Kettlewise K2: chosen from the question"}
+{"type": "progress", "agent": "kettle_agent", "status": "running", "detail": "Searching the Kettlewise K2 documents"}
+{"type": "progress", "agent": "kettle_agent", "status": "running", "detail": "Found 4 matching sections, writing the answer"}
+{"type": "progress", "agent": "kettle_agent", "status": "done", "detail": "answered from the documents"}
+{"type": "answer", "found": true, "answer": "...", "citations": ["user_manual.md#Descaling"], ...}
+```
+
+If something fails after the stream has started, the last event is `{"type": "error", "detail": "..."}` instead of `answer`.
+
 **List the products**
 
 ```bash

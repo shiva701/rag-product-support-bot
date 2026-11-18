@@ -11,9 +11,11 @@ One <product>_agent node is created for every folder in kb/, so adding a product
 Print the diagram with:  python graph.py
 """
 
+from collections.abc import Iterator
 from typing import TypedDict
 
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.config import get_stream_writer
 from langgraph.graph import END, START, StateGraph
 
 from products import PRODUCTS, Product
@@ -37,13 +39,21 @@ class State(TypedDict, total=False):
     trace: list[dict]  # which agents ran, for the UI and debugging
 
 
+def progress(agent: str, detail: str, status: str = "running") -> None:
+    """Report live activity to stream() callers (the web UI). A no-op when not streaming."""
+    get_stream_writer()({"agent": agent, "status": status, "detail": detail})
+
+
 def step(state: State, agent: str, detail: str) -> list[dict]:
+    """Record a finished step in the trace and report it as done."""
+    progress(agent, detail, status="done")
     return state.get("trace", []) + [{"agent": agent, "detail": detail}]
 
 
 # --- Router agent ------------------------------------------------------------
 def router(state: State) -> dict:
     requested, active = state.get("requested_product"), state.get("product")
+    progress("router", "Reading the question to pick a product")
     if requested:
         product, how, detail = requested, "user", "you selected this product"
     elif len(PRODUCTS) == 1:
@@ -73,6 +83,7 @@ def after_router(state: State) -> str:
 
 
 def clarify(state: State) -> dict:
+    progress("clarify", "No product matched, asking which one you mean")
     names = ", ".join(p.name for p in PRODUCTS.values())
     return {
         "found": False,
@@ -90,6 +101,7 @@ def make_product_agent(product: Product):
     name = f"{product.id}_agent"
 
     def agent(state: State) -> dict:
+        progress(name, f"Searching the {product.name} documents")
         hits = retrieve(state["question"], product)
         best = hits[0]["score"] if hits else 0.0
 
@@ -105,6 +117,7 @@ def make_product_agent(product: Product):
             }
 
         # Gate 2: the model read the sections and says they don't answer it.
+        progress(name, f"Found {len(hits)} matching sections, writing the answer")
         result = grounded_answer(state["question"], hits, product)
         if result["error"]:
             # The model's reply was unusable. We don't know whether the documents cover the
@@ -147,6 +160,7 @@ def after_product_agent(state: State) -> str:
 # --- General-knowledge agent (only for products with general_fallback = true) -
 def general_agent(state: State) -> dict:
     product = PRODUCTS[state["product"]]
+    progress("general_agent", "The documents don't cover this, trying general knowledge")
     result = general_answer(state["question"], product)
     if not result["relevant"]:
         return {
@@ -211,9 +225,9 @@ def build_graph():
 app = build_graph()
 
 
-def run(question: str, product_id: str | None, thread_id: str) -> State:
-    """Run one turn. Per-turn fields are reset here; 'product' carries over within a thread."""
-    turn = {
+def _turn(question: str, product_id: str | None) -> dict:
+    """Input for one turn. Per-turn fields are reset here; 'product' carries over in a thread."""
+    return {
         "question": question,
         "requested_product": product_id,
         "routed_by": None,
@@ -225,7 +239,26 @@ def run(question: str, product_id: str | None, thread_id: str) -> State:
         "source": None,
         "trace": [],
     }
-    return app.invoke(turn, config={"configurable": {"thread_id": thread_id}})
+
+
+def run(question: str, product_id: str | None, thread_id: str) -> State:
+    """Run one turn and return the final state."""
+    config = {"configurable": {"thread_id": thread_id}}
+    return app.invoke(_turn(question, product_id), config=config)
+
+
+def stream(question: str, product_id: str | None, thread_id: str) -> Iterator[tuple[str, dict]]:
+    """Run one turn, yielding ("progress", event) as the agents work, then ("final", state)."""
+    config = {"configurable": {"thread_id": thread_id}}
+    state: State = {}
+    for mode, chunk in app.stream(
+        _turn(question, product_id), config=config, stream_mode=["custom", "values"]
+    ):
+        if mode == "custom":
+            yield "progress", chunk
+        else:
+            state = chunk  # the full state after each step; the last one is the result
+    yield "final", state
 
 
 if __name__ == "__main__":

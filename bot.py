@@ -1,8 +1,10 @@
-"""The one function the rest of the app calls: answer(). The work happens in graph.py."""
+"""What the rest of the app calls: answer(), or answer_stream() for live progress.
+The work happens in graph.py."""
 
 import uuid
+from collections.abc import Iterator
 
-from graph import run
+from graph import run, stream
 from products import PRODUCTS, get_product
 
 
@@ -17,8 +19,25 @@ def answer(question: str, product_id: str | None = None, thread_id: str | None =
     if product_id is not None:
         get_product(product_id)  # raises KeyError for an unknown product
     thread_id = thread_id or uuid.uuid4().hex
-    state = run(question, product_id, thread_id)
+    return _result(run(question, product_id, thread_id), thread_id)
 
+
+def answer_stream(
+    question: str, product_id: str | None = None, thread_id: str | None = None
+) -> Iterator[tuple[str, dict]]:
+    """Like answer(), but yields ("progress", {"agent", "status", "detail"}) while the agents
+    work, then ("answer", <the same dict answer() returns>)."""
+    if product_id is not None:
+        get_product(product_id)
+    thread_id = thread_id or uuid.uuid4().hex
+    for kind, data in stream(question, product_id, thread_id):
+        if kind == "progress":
+            yield "progress", data
+        else:
+            yield "answer", _result(data, thread_id)
+
+
+def _result(state: dict, thread_id: str) -> dict:
     product = PRODUCTS.get(state.get("product") or "")
     return {
         "found": state["found"],  # True when the bot answered (from docs or general)

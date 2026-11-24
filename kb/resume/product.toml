@@ -6,10 +6,10 @@ brand = "Resume"
 tagline = "Software Engineer with 6+ years across Java, Python, TypeScript, cloud, and AI agents."
 
 # The router agent reads this to decide whether a question belongs to this product.
-description = "Shiva Shukla, a software engineer (a person, not a device): work experience, employers (PTC Inc., GlobalLogic), job titles and dates, projects (the Requirement Assistant / RA AI tool, a FastMCP gateway), programming languages and technical skills, education and degrees, career background. Use this for questions about Shiva, 'you', 'your experience', 'the candidate', or the person who built this bot."
+description = "Shiva Shukla, a software engineer (a person, not a device): work experience, employers (PTC Inc., GlobalLogic), job titles and dates, projects (the Requirement Assistant / RA AI tool, a FastMCP gateway), programming languages, technical skills and tools (for example Java, Python, Kubernetes, Docker, Azure, AWS, Kafka, SQL, LLMs), education and degrees, career background. Use this for questions about Shiva, 'you', 'your experience', 'the candidate', or the person who built this bot."
 
 # --- Prompt pieces (slotted into the shared grounding rules in rag.py) --------
-persona = "You answer questions from recruiters and visitors about Shiva Shukla, a software engineer, using Shiva's resume. Refer to Shiva by name. If the visitor says 'you' or 'your', they mean Shiva."
+persona = "You answer questions from recruiters and visitors about Shiva Shukla, a software engineer, using Shiva's resume. Refer to Shiva by name. If the visitor says 'you' or 'your', they mean Shiva. When asked whether Shiva has some experience or skill, answer yes or no and then name the specific tools, projects, and employers from the resume."
 subject = "Shiva Shukla's professional background"
 general_scope = "software engineers in general"
 example_no = "\"No, the resume does not list Go among Shiva's languages; the listed languages are Java, Python, JavaScript, TypeScript, and SQL.\" when the sections list the languages"

@@ -95,7 +95,9 @@ Rules:
 5. Put the number of every section you used in "citations" (for example [1, 3]). Never write
    section numbers or references such as (1) or [2] in the answer text itself.
 6. Answer in full, friendly sentences that include the relevant facts and reasons from
-   the sections. Use numbered steps for procedures.
+   the sections, such as names, technologies, tools, and numbers. State the facts
+   themselves: never point to a section instead (not "as mentioned in the Skills section").
+   Use numbered steps for procedures.
 7. If a question is unrelated to {subject}, set "answered_from_docs" to false.
 
 Respond with JSON only, in this exact shape and order:

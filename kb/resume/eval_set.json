@@ -8,7 +8,9 @@
   {"q": "Which databases has Shiva worked with?", "should_answer": true,
    "expected_section": "Skills: Databases", "must_include": ["Couchbase", "Redis"]},
   {"q": "What did Shiva do at GlobalLogic?", "should_answer": true,
-   "expected_section": "GlobalLogic - Software Engineer (Jul 2018 - Aug 2021)", "must_include": ["Kafka"]},
+   "expected_section": "GlobalLogic - Senior Software Engineer (Jul 05 2018 - Aug 06 2021)", "must_include": ["Kafka"]},
+  {"q": "What roles did Shiva hold at GlobalLogic?", "should_answer": true,
+   "expected_section": "GlobalLogic - Senior Software Engineer (Jul 05 2018 - Aug 06 2021)", "must_include": ["Associate Software Engineer", "Senior Software Engineer"]},
   {"q": "Does Shiva have experience with MCP servers?", "should_answer": true,
    "expected_section": "AI, LLM, and Agent Experience", "must_include": ["FastMCP"]},
   {"q": "What is your experience with Kubernetes?", "should_answer": true,
@@ -20,14 +22,15 @@
   {"q": "Which security tools has Shiva used?", "should_answer": true,
    "expected_section": "Skills: Security", "must_include": ["OAuth2"]},
   {"q": "How much did Shiva improve test coverage for the RA tool?", "should_answer": true,
-   "expected_section": "PTC Inc. - Associate Software Engineer (Aug 2023 - Jan 2026)", "must_include": ["80%"]},
+   "expected_section": "PTC Inc. - Associate Software Engineer (Aug 28 2023 - Jan 31 2026)", "must_include": ["80%"]},
   {"q": "When did Shiva work at PTC?", "should_answer": true,
    "expected_section": "Career Timeline", "must_include": ["2023"]},
+  {"q": "Has Shiva worked at Google?", "should_answer": true,
+   "expected_section": "Career Timeline", "must_include": ["no"]},
 
   {"q": "What is Shiva's salary expectation?", "should_answer": false},
   {"q": "Is Shiva married?", "should_answer": false},
   {"q": "What is Shiva's phone number?", "should_answer": false},
-  {"q": "Has Shiva worked at Google?", "should_answer": false},
   {"q": "What's the weather tomorrow?", "should_answer": false},
   {"q": "Write me a poem about tea.", "should_answer": false}
 ]

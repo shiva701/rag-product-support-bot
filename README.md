@@ -140,7 +140,7 @@ This splits each product's docs into sections, embeds them, and saves one index 
 curl localhost:11434        # should print "Ollama is running"
 ```
 
-### Option A: Web UI (manual)
+### Start the servers
 
 Use two terminals.
 
@@ -157,16 +157,6 @@ npm run dev
 ```
 
 Open **http://localhost:5173**. Choose **Auto** to let the router pick the product for each question, or choose a product to talk to its agent only. Each reply shows which agent answered; click the line under a reply to see the steps the agents took.
-
-### Option B: Terminal chat
-
-```bash
-source .venv/bin/activate
-python chat.py            # the router picks the product
-python chat.py resume     # one product only
-```
-
-Type `use phone` or `use auto` to switch, `products` to list them, `debug` to toggle agent steps and retrieval scores, `quit` to exit.
 
 ### Stop the servers
 
@@ -395,7 +385,6 @@ product-support-bot/
 ├── graph.py          # LangGraph: router, product agents, general agent, escalation
 ├── bot.py            # answer(): runs the graph for one question
 ├── api.py            # FastAPI server
-├── chat.py           # terminal chat
 ├── calibrate.py      # threshold helper
 ├── evaluate.py       # eval runner
 ├── kb/

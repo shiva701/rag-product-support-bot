@@ -8,7 +8,7 @@ A local, multi-agent RAG (retrieval-augmented generation) support bot built with
 | `phone` | The fictional *Zentro A5* smartphone | Gives general smartphone information from the chat model, with a notice that it didn't come from the docs |
 | `resume` | Shiva Shukla's professional background | Escalates (never guesses facts about a person) |
 
-Each agent answers only from its own docs and cites its sources. Everything runs on your machine: no API keys or usage costs.
+Each agent answers only from its own docs; the API also returns the document sections each answer used. Everything runs on your machine: no API keys or usage costs.
 
 ```
 question -> router -> kettle_agent | phone_agent | resume_agent -> answer from the docs
@@ -26,7 +26,7 @@ Print the real graph as a Mermaid diagram with `python graph.py`.
 
 ![Start screen in Auto mode, listing the three products](docs/screenshots/01-auto-home.png)
 
-**Routing.** Two questions in one conversation go to two different agents. Each reply shows which agent answered, the document sections it cited, and the steps the agents took.
+**Routing.** Two questions in one conversation go to two different agents. Each reply shows which agent answered and the steps the agents took, with how long each step ran.
 
 ![The router sends a kettle question to the kettle agent and a phone question to the phone agent](docs/screenshots/02-auto-routing.png)
 
@@ -34,9 +34,9 @@ Print the real graph as a Mermaid diagram with `python graph.py`.
 
 ![A phone answer from the docs, followed by a labelled general-information answer](docs/screenshots/03-phone-general-fallback.png)
 
-**Resume and escalation.** The resume agent answers from the resume and cites the sections it used. When the resume doesn't cover a question, it declines instead of guessing.
+**Resume and escalation.** The resume agent answers from the resume. When the resume doesn't cover a question, it declines instead of guessing.
 
-![A resume answer with citations, followed by an escalation for a question the resume doesn't cover](docs/screenshots/04-resume-and-escalation.png)
+![A resume answer, followed by an escalation for a question the resume doesn't cover](docs/screenshots/04-resume-and-escalation.png)
 
 | Part | Tool |
 |---|---|

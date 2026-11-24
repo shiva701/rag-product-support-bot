@@ -43,9 +43,10 @@ Full-stack work with Python, Java, TypeScript, Lit, Azure, and SQL.
 - Co-developed a FastAPI application using LangChain and OpenAI LLMs to evaluate and rewrite software requirements as per INCOSE standards, reducing token costs by 25% and improving F1 score by 22% through prompt optimization.
 - Integrated an API in the RA plugin to send API metadata to Snowflake for faster failure triage.
 - Optimized stored procedures in a MySQL database, improving the GET API performance by 30%.
+- Utilized ThingWorx, JavaScript, Java, Spring Boot, RabbitMQ, and Azure to build a production-cycle analytics product with machine learning models that forecast output and detect the impact of equipment failures and machine faults, improving accuracy by 18%.
 
-## GlobalLogic - Software Engineer (Jul 2018 - Aug 2021)
-Role: Software Engineer at GlobalLogic, Noida, India, from Jul 2018 to Aug 2021.
+## GlobalLogic - Senior Software Engineer (Jul 2018 - Aug 2021)
+Role: Senior Software Engineer at GlobalLogic, Noida, India, from Jul 2018 to Aug 2021.
 Backend engineering with Java, Spring Boot, Spring WebFlux, and NoSQL.
 - Developed REST APIs for a learning platform using Java, Spring Boot, Reactive Streams, Kafka, and the Couchbase NoSQL database; added unit tests with JUnit, Mockito, and StepVerifier, improving code quality by 35% and test coverage by 40%.
 - Implemented Kafka with Spring Cloud Streams API and a retry mechanism to improve microservice reliability by 30%.
@@ -70,7 +71,7 @@ Prompt Engineering, Claude, and GitHub Copilot.
 - Built an Azure-based FastMCP gateway exposing registered agent tools via JSON-RPC 2.0 and REST APIs, with caching for agent discovery and routing (PTC Inc.).
 - Co-developed a FastAPI application using LangChain and OpenAI LLMs to evaluate and rewrite software requirements, reducing token costs by 25% and improving F1 score by 22% through prompt optimization (PTC Inc.).
 - Obfuscated 10+ core LLM algorithms using Cython for a private SaaS deployment, keeping latency within 3% of the Python baseline (PTC Inc.).
-- Used AI-assisted development tools (GitHub Copilot, Claude) to generate and debug test suites, raising RA test coverage from 30% to 80% (PTC Inc.).
+- Used AI-assisted development tools (GitHub Copilot, Claude Code) to generate and debug test suites, raising RA test coverage from 30% to 80% (PTC Inc.).
 
 ## Skills: Languages and Frameworks
 Languages: Java, Python, JavaScript, TypeScript, SQL, HTML5, CSS, React.
@@ -78,9 +79,7 @@ Frameworks: Hibernate, Spring Boot, Spring Cloud, JUnit, Mockito, TestNG, ShellS
 
 ## Skills: Cloud, DevOps, and Tools
 Cloud: Azure Kubernetes Service (AKS), Azure Storage, and AWS (S3, EC2, RDS, DynamoDB, Lambda, CloudWatch).
-Tools and technologies: GitLab, Jenkins, Git, Docker, Kubernetes, Apache Tomcat, Kafka, Zookeeper,
-Maven, Gradle, Agile, Linux, Microservices, Helm, Terraform, OpenTelemetry, Prometheus, Datadog,
-Snowflake, RESTful APIs, Swagger, GitHub Actions, Node.js.
+Tools and technologies: GitLab, Jenkins, Git, Docker, Kubernetes, Apache Tomcat, Kafka, Zookeeper, Maven, Gradle, Agile, Linux, Microservices, Helm, Terraform, OpenTelemetry, Prometheus, Datadog, Snowflake, RESTful APIs, Swagger, GitHub Actions, Node.js.
 
 ## Skills: Databases
 Couchbase, MySQL, PostgreSQL, and Redis.
@@ -89,8 +88,10 @@ stored procedures and used Postgres at PTC Inc., and added Redis caching to the 
 
 ## Skills: Security
 OAuth2, JWT, Spring Security, HashiCorp Vault, Wiz, Black Duck, Checkmarx, Invicti, and SonarQube.
-Shiva secured APIs and plugins with OAuth2/JWT and token rotation, and integrated HashiCorp Vault,
-Wiz, Black Duck, Invicti, and Checkmarx security scanning into CI/CD pipelines.
+Shiva secured APIs and plugins with OAuth2/JWT and token rotation, and integrated HashiCorp Vault, Wiz, Black Duck, Invicti, and Checkmarx security scanning into CI/CD pipelines.
+
+## Skills: AI
+Model Context Protocol (MCP), FastMCP, LangChain, LLM, LangGraph, Retrieval-Augmented Generation (RAG), Vector Search, Embeddings, AI Agents, Prompt Engineering, Claude Code, GitHub Copilot
 
 ## Education
 - George Mason University, Fairfax, VA: Master of Science in Computer Science, Aug 2021 - May 2023, GPA 3.93.

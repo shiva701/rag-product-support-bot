@@ -8,7 +8,7 @@ load_dotenv()
 
 # Fully local setup: sentence-transformers for embeddings, Ollama for chat.
 EMBED_MODEL = os.getenv("EMBED_MODEL", "google/embeddinggemma-300m")
-CHAT_MODEL = os.getenv("CHAT_MODEL", "gemma4")  # any model from `ollama list`
+CHAT_MODEL = os.getenv("CHAT_MODEL", "llama3.2")  # any model from `ollama list`
 
 KB_DIR = "kb"  # one sub-folder per product: kb/<product>/
 INDEX_DIR = "index"  # one index per product:      index/<product>/

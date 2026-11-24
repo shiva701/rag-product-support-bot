@@ -17,17 +17,6 @@ const AGENT_LABELS = {
   escalate: "Escalation",
 };
 
-// "user_manual.md#Descaling" -> "User Manual › Descaling"
-function formatCitation(id) {
-  const [file, section] = id.split("#");
-  const doc = file
-    .replace(/\.md$/, "")
-    .split("_")
-    .map((w) => (w === "and" ? w : w.charAt(0).toUpperCase() + w.slice(1)))
-    .join(" ");
-  return section ? `${doc} › ${section}` : doc;
-}
-
 // Merge one progress event into the activity list. Each agent gets one row: "running"
 // events update its text, and "done" marks it finished and records how long it took.
 function applyProgress(steps, ev) {
@@ -142,7 +131,6 @@ export default function App() {
         {
           role: "bot",
           text: data.answer,
-          citations: data.citations,
           escalated: !data.found,
           general: data.source === "general",
           productName: data.product_name,
@@ -260,13 +248,6 @@ export default function App() {
                 </p>
               )}
               <p>{msg.text}</p>
-              {msg.citations?.length > 0 && (
-                <ul className="sources">
-                  {msg.citations.map((c) => (
-                    <li key={c}>{formatCitation(c)}</li>
-                  ))}
-                </ul>
-              )}
               {msg.activity?.length > 0 && (
                 <details className="trace">
                   <summary>

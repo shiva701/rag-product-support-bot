@@ -288,6 +288,28 @@ Add a product id to run one product only, e.g. `python evaluate.py phone`.
 | Answer content correct | The answer contains the key facts |
 | Routing accuracy | Without being told the product, the router sent the question to the right agent |
 
+### LLM as judge
+
+The "answer content correct" score only checks that key words appear in the answer. Add `--judge` to have a second, bigger model (`JUDGE_MODEL`, default `gemma4`) read each answer and grade it:
+
+```bash
+ollama pull gemma4
+python evaluate.py --judge phone
+```
+
+| Answer type | The judge grades (1-5 unless noted) |
+|---|---|
+| From the docs | **Faithfulness**: every claim is supported by the retrieved sections. **Completeness**: the whole question is answered. **Correctness**: only when the test has a `"reference"` answer |
+| General knowledge | **Leaks product facts** (yes/no): states a spec, price or feature the bot can't know. **Helpfulness** |
+
+An answer passes when every score is 4 or more (and, for general answers, nothing leaks). Failing lines show the judge's reasoning and any unsupported claims. To grade correctness too, add a short reference answer to a test in `eval_set.json`:
+
+```json
+{"q": "How fast does the Zentro A5 charge?", "...": "...", "reference": "45W wired fast charging."}
+```
+
+The judge is a model too: spot-check some of its grades by hand before you rely on the numbers. Judging makes the run several times slower.
+
 Set `min_score` in `kb/<product>/product.toml` from the calibration output. If the two groups of scores overlap, lean low and let the model handle borderline questions.
 
 ---
@@ -386,7 +408,8 @@ product-support-bot/
 ├── bot.py            # answer(): runs the graph for one question
 ├── api.py            # FastAPI server
 ├── calibrate.py      # threshold helper
-├── evaluate.py       # eval runner
+├── evaluate.py       # eval runner (--judge for LLM-as-judge grading)
+├── judge.py          # LLM-as-judge prompts
 ├── kb/
 │   ├── kettle/       # product.toml, docs, eval_set.json
 │   ├── phone/

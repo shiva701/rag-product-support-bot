@@ -9,6 +9,9 @@ load_dotenv()
 # Fully local setup: sentence-transformers for embeddings, Ollama for chat.
 EMBED_MODEL = os.getenv("EMBED_MODEL", "google/embeddinggemma-300m")
 CHAT_MODEL = os.getenv("CHAT_MODEL", "llama3.2")  # any model from `ollama list`
+# Grades answers in `evaluate.py --judge`. Use a bigger model than CHAT_MODEL: a model tends
+# to rate its own answers too kindly, and small models are unreliable graders.
+JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemma4")
 
 KB_DIR = "kb"  # one sub-folder per product: kb/<product>/
 INDEX_DIR = "index"  # one index per product:      index/<product>/

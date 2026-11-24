@@ -12,13 +12,13 @@ from products import PRODUCTS, Product, get_store
 client = ollama.Client(timeout=CHAT_TIMEOUT_SECONDS)
 
 
-def chat_json(messages: list[dict], schema: dict) -> dict:
+def chat_json(messages: list[dict], schema: dict, model: str = CHAT_MODEL) -> dict:
     """One Ollama call whose reply must match a JSON schema. Returns {} if it doesn't."""
     # Two guards against a reply that never ends (small models sometimes break the JSON and
     # then print blank lines forever): the schema restricts what the model can write, and
     # num_predict caps the length. A cut-off reply is not valid JSON, so it comes back as {}.
     resp = client.chat(
-        model=CHAT_MODEL,
+        model=model,
         messages=messages,
         format=schema,
         options={"temperature": 0, "num_predict": MAX_ANSWER_TOKENS},
